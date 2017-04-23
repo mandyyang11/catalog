@@ -301,6 +301,37 @@ def catalog_json():
 
     return jsonify(j)
 
+
+# Json api for arbitrary item
+@app.route('/api/<catalog_name>/<item_name>')
+def item_json(catalog_name, item_name):
+
+    # check whether catalog_name and item_name are in the database
+    valid_item = (
+        session.query(Item)
+        .join(Category)
+        .filter(Category.name == catalog_name)
+        .filter(Item.name == item_name)
+        )
+    if valid_item.count() == 1:
+        item = valid_item.one()
+        j = {"item": {"id": item.id,
+                      "name": item.name,
+                      "description": item.description,
+                      "user": {"user_id": item.user.id,
+                               "user_name": item.user.name,
+                               "user_email": item.user.email},
+                      "category": {"cat_id": item.category.id,
+                                   "cat_name": item.category.name}}}
+        return jsonify(j)
+
+    else:
+
+        # if either names invalid, redirect back to
+        # home and flash the error message
+        flash("catalog name and/or item_name invalid, please check your url")
+        return redirect(url_for('homepage'))
+        
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
