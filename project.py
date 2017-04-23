@@ -176,6 +176,70 @@ def newItem():
                                user=login_session['username'])
 
 
+# Edit an item
+@app.route('/item/edit/<catalog_name>/<item_name>', methods=['GET', 'POST'])
+def editItem(catalog_name, item_name):
+
+    # check whether catalog_name and item_name are in the database
+    current_valid_item = (
+        session.query(Item)
+        .join(Category)
+        .filter(Category.name == catalog_name)
+        .filter(Item.name == item_name)
+        )
+    if current_valid_item.count() == 1:
+        editedItem = current_valid_item.one()
+        if 'username' not in login_session:
+            return redirect('/login')
+        if editedItem.user.name != login_session['username']:
+
+            # only the owner can edit the item
+            flash('Only The Owner Can Edit The Item!')
+            return redirect(url_for('homepage'))
+        if request.method == 'POST':
+            current_category = (
+                session.query(Category)
+                .filter(Category.name == request.form['category'])
+                .one()
+                )
+
+            # check if the item is not yet in the database
+            valid_item = (
+                session.query(Item)
+                .join(Category)
+                .filter(Category.name == request.form['category'])
+                .filter(Item.name == request.form['title'])
+                )
+            if valid_item.count() == 0:
+                editedItem.name = request.form['title']
+                editedItem.description = request.form['description']
+                editedItem.category = current_category
+                session.add(editedItem)
+                session.commit()
+                flash('Item Successfully Edited')
+                return redirect(url_for('homepage'))
+            else:
+
+                # in the case when its duplicated,
+                # redirect to homepage and flash error message
+                flash('Item Fail to Edit! %s is Duplicated'
+                      % request.form['title'])
+                return redirect(url_for('homepage'))
+        else:
+            categories = session.query(Category).all()
+            return render_template('new_item.html',
+                                   categories=categories,
+                                   page_title="Edit",
+                                   user=login_session['username'])
+    else:
+
+        # if either names invalid, redirect back to
+        # home and flash the error message
+        flash("catalog name and/or item_name invalid, please check your url")
+        return redirect(url_for('homepage'))
+
+
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
