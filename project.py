@@ -239,6 +239,42 @@ def editItem(catalog_name, item_name):
         return redirect(url_for('homepage'))
 
 
+# Delete an item
+@app.route('/item/delete/<catalog_name>/<item_name>', methods=['GET', 'POST'])
+def deleteItem(catalog_name, item_name):
+
+    # check whether catalog_name and item_name are in the database
+    current_valid_item = (
+        session.query(Item)
+        .join(Category)
+        .filter(Category.name == catalog_name)
+        .filter(Item.name == item_name)
+        )
+    if current_valid_item.count() == 1:
+        itemToDelete = current_valid_item.one()
+        if 'username' not in login_session:
+            return redirect('/login')
+        if itemToDelete.user.name != login_session['username']:
+
+            # only the owner can delete the item
+            flash('Only The Owner Can Delete The Item!')
+            return redirect(url_for('homepage'))
+        if request.method == 'POST':
+            deleted_name = itemToDelete.name
+            session.delete(itemToDelete)
+            session.commit()
+            flash('%s Item Successfully Deleted' % deleted_name)
+            return redirect(url_for('homepage'))
+        else:
+            categories = session.query(Category).all()
+            return render_template('delete_item.html',
+                                   user=login_session['username'])
+    else:
+        # if either names invalid, redirect back to
+        # home and flash the error message
+        flash("catalog name and/or item_name invalid, please check your url")
+        return redirect(url_for('homepage'))
+
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
