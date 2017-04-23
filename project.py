@@ -276,6 +276,31 @@ def deleteItem(catalog_name, item_name):
         return redirect(url_for('homepage'))
 
 
+# Json api for all catalogy data
+@app.route('/catalog.json')
+def catalog_json():
+
+    # constructing a output structure similar to the sample
+    j = {"catalog": []}
+    categories = session.query(Category).all()
+    for i in xrange(len(categories)):
+        j["catalog"].append({})
+        j["catalog"][i]["id"] = categories[i].id
+        j["catalog"][i]["name"] = categories[i].name
+
+    items = session.query(Item).all()
+    for i in xrange(len(items)):
+        tmp = {"cat_id": items[i].category_id,
+               "description": items[i].description,
+               "id": items[i].id,
+               "title": items[i].name}
+        if "Item" in j["catalog"][items[i].category_id-1]:
+            j["catalog"][items[i].category_id-1]["Item"].append(tmp)
+        else:
+            j["catalog"][items[i].category_id-1]["Item"] = [tmp]
+
+    return jsonify(j)
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
