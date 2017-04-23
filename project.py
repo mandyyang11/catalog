@@ -51,6 +51,39 @@ def homepage():
                                user=login_session['username'])
 
 
+# show category items
+@app.route('/catalog/<catalog_name>/items')
+def showCategory(catalog_name):
+    categories = session.query(Category)
+
+    # check whether catalog_name is in the database
+    valid_name = categories.filter(Category.name == catalog_name).count()
+    if valid_name == 1:
+        items = (
+            session.query(Item)
+            .join(Category)
+            .filter(Category.name == catalog_name)
+            )
+
+        # check if the user is logged in and display the page accordingly
+        if 'username' not in login_session:
+            return render_template('category_page_public.html',
+                                   items=items,
+                                   categories=categories,
+                                   current_category=catalog_name)
+        else:
+            return render_template('category_page_private.html',
+                                   items=items,
+                                   categories=categories,
+                                   current_category=catalog_name,
+                                   user=login_session['username'])
+    else:
+
+        # if catalog name invalid, redirect back to
+        # home and flash the error message
+        flash("catalog name invalid, please check your url")
+        return redirect(url_for('homepage'))
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
