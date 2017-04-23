@@ -1,0 +1,79 @@
+{% extends "main.html" %}
+{% block content %}
+	<div class="row top-menu">
+		<div class="col-md-10"></div>
+		<div class="col-md-2 text-right">
+			<a href="{{url_for('showLogin')}}">Click Here to Log in </a>
+		</div>
+	</div>
+	<div class="row divider blue">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner main">
+		
+	</div>
+
+	<div class = 'flash'>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li> <strong> {{ message }} </strong> </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+
+	
+	<div class="row padding-top padding-bottom">
+		<div class="col-md-1"></div>
+		<div class="col-md-10 padding-none">
+			
+		</div>
+		<div class="col-md-1"></div>
+        <div class="col-md-12 text-center" href = "{{url_for('homepage')}}">
+            <a href = "{{url_for('homepage')}}"><h1><b>Catalog App</b></h1></a>
+        </div>
+	</div>
+
+
+
+    <div class="col-md-1"></div>
+
+    <div class="col-md-4">
+        <div class="col-md-12 text-center">
+            <h2>Categories</h2>
+        </div>
+        
+	{% for category in categories %}
+		<a href = "{{url_for('showCategory', catalog_name = category.name)}}">
+			<div class="row">
+				<div class="col-md-1"></div>
+					<div class="col-md-10 restaurant-list">
+						<h3>{{category.name}}</h3>
+					</div>
+				<div class="col-md-1"></div>
+			</div>
+		</a>
+	{% endfor %}
+    </div>
+
+    <div class="col-md-7">
+        <div class="col-md-12 text-center">
+            <h2>Latest Items</h2>
+        </div>
+        {% for latest_item in latest_items %}
+        <a href = "{{url_for('showItem', catalog_name = latest_item.category.name, item_name = latest_item.name)}}">
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10 restaurant-list">
+                    <h3>{{latest_item.name}} <i>({{latest_item.category.name}})</i></h3>
+                </div>
+                <div class="col-md-1"></div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+{% endblock %}
