@@ -84,6 +84,49 @@ def showCategory(catalog_name):
         flash("catalog name invalid, please check your url")
         return redirect(url_for('homepage'))
 
+
+# show a specific item
+@app.route('/catalog/<catalog_name>/<item_name>')
+def showItem(catalog_name, item_name):
+
+    # check whether catalog_name and item_name are in the database
+    valid_item = (
+        session.query(Item)
+        .join(Category)
+        .filter(Category.name == catalog_name)
+        .filter(Item.name == item_name)
+        )
+    if valid_item.count() == 1:
+        valid_item = valid_item.one()
+
+        if 'username' in login_session:
+            if valid_item.user.name == login_session['username']:
+                # only show edit and delete option if the user
+                # is both logged in and is the owner
+                return render_template('item_page_private.html',
+                                       item_description=valid_item.description,
+                                       item_name=valid_item.name,
+                                       category_name=valid_item.category.name,
+                                       user=login_session['username'],
+                                       owner_check=True)
+            else:
+                return render_template('item_page_private.html',
+                                       item_description=valid_item.description,
+                                       item_name=valid_item.name,
+                                       category_name=valid_item.category.name,
+                                       user=login_session['username'],
+                                       owner_check=False)
+        else:
+            return render_template('item_page_public.html',
+                                   item_description=valid_item.description,
+                                   item_name=valid_item.name)
+    else:
+
+        # if either names invalid, redirect back to
+        # home and flash the error message
+        flash("catalog name and/or item_name invalid, please check your url")
+        return redirect(url_for('homepage'))
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
