@@ -1,0 +1,98 @@
+{% extends "main.html" %}
+{% block content %}
+	<div class="row top-menu">
+		<div class="col-md-10"></div>
+		<div class="col-md-2 text-right">
+            <p>Logged in as {{user}}</p>
+            <br>
+            <a href="{{url_for('gdisconnect')}}">Click Here to Log out </a>
+		</div>
+	</div>
+	<div class="row divider blue">
+		<div class="col-md-12"></div>
+	</div>
+	<div class="row banner main">
+		
+	</div>
+
+	<div class = 'flash'>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li> <strong> {{ message }} </strong> </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+    </div>
+
+
+	
+	<div class="row padding-top padding-bottom">
+		<div class="col-md-1"></div>
+		<div class="col-md-10 padding-none">
+			
+		</div>
+		<div class="col-md-1"></div>
+        <div class="col-md-12 text-center">
+            <a href = "{{url_for('homepage')}}"><h1><b>Catalog App</b></h1></a>
+        </div>
+	</div>
+
+
+
+    <div class="col-md-1"></div>
+
+    <div class="col-md-10">
+        <div class="col-md-12 text-center">
+            <h2>{{page_title}} Item</h2>
+        </div>
+        
+			<div class="row">
+				<div class="col-md-1"></div>
+					<div class="col-md-10 restaurant-list">
+                        <form method="POST">
+                            <table>
+                                
+                                <tr>
+                                    <td class="label">
+                                        Title
+                                    </td>
+                                    <td>
+                                        <input type="text" name="title" value="">
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="label">
+                                        Description
+                                    </td>
+                                    <td>
+                                        <input type="text" name="description" value="">
+                                    </td>
+                                </tr>
+                                
+                                <tr>
+                                    <td class="label">
+                                        Category
+                                    </td>
+                                    <td>
+                                        <select name="category">
+                                            <p>items</p>
+                                            {% for category in categories %}
+                                            <option value="{{ category.name }}">{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                </tr>
+                                
+                            </table>
+                            <input type="submit">
+                        </form>
+					</div>
+				<div class="col-md-1"></div>
+			</div>
+		    </div>
+
+{% endblock %}

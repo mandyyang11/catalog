@@ -127,6 +127,55 @@ def showItem(catalog_name, item_name):
         flash("catalog name and/or item_name invalid, please check your url")
         return redirect(url_for('homepage'))
 
+
+# Create a new item
+@app.route('/item/new/', methods=['GET', 'POST'])
+def newItem():
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        current_user = (
+            session.query(User)
+            .filter(User.name == login_session['username'])
+            .one()
+            )
+        current_category = (
+            session.query(Category)
+            .filter(Category.name == request.form['category'])
+            .one()
+            )
+
+        # check if the item is not yet in the database
+        valid_item = (
+            session.query(Item)
+            .join(Category)
+            .filter(Category.name == request.form['category'])
+            .filter(Item.name == request.form['title'])
+            )
+        if valid_item.count() == 0:
+            new_item = Item(user=current_user,
+                            name=request.form['title'],
+                            description=request.form['description'],
+                            category=current_category)
+            session.add(new_item)
+            session.commit()
+            flash('New Item %s Successfully Created' % new_item.name)
+            return redirect(url_for('homepage'))
+        else:
+
+            # in the case when its duplicated,
+            # redirect to homepage and flash error message
+            flash('New Item Fail to Create! %s is Duplicated'
+                  % request.form['title'])
+            return redirect(url_for('homepage'))
+    else:
+        categories = session.query(Category).all()
+        return render_template('new_item.html',
+                               categories=categories,
+                               page_title='New',
+                               user=login_session['username'])
+
+
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'
     app.debug = True
